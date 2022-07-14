@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".HomeActivity">
+
+    <ListView
+
+        android:id="@+id/list_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+</LinearLayout>
+
+<!--<androidx.cardview.widget.CardView-->
+<!--android:layout_width="match_parent"-->
+<!--android:layout_height="wrap_content"-->
+<!--app:cardElevation="2dp"-->
+<!--app:cardCornerRadius="12dp"-->
+<!--android:layout_margin="10dp">-->
+
+<!--<RelativeLayout-->
+<!--    android:layout_width="wrap_content"-->
+<!--    android:layout_height="wrap_content">-->
+
+<!--    <TextView-->
+<!--        style="@style/card_view"-->
+<!--        android:id="@+id/first_txt"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_alignParentLeft="true"-->
+<!--        android:text="Google" />-->
+
+<!--    <TextView-->
+<!--        style="@style/card_view"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_alignParentRight="true"-->
+<!--        android:text="02/07/22" />-->
+
+<!--    <TextView-->
+<!--        style="@style/card_view"-->
+<!--        android:id="@+id/second_txt"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@+id/first_txt"-->
+<!--        android:text="prajapatiomkar01@gmail.com" />-->
+
+<!--    <TextView-->
+<!--        style="@style/card_view"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@+id/second_txt"-->
+<!--        android:text="************" />-->
+<!--</RelativeLayout>-->
+<!--</androidx.cardview.widget.CardView>-->

@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">KYCS</string>
+    <string name="splash_name_heading">Keep your Credentials Safe</string>
+    <string name="developer_name">Made By. Prajapati omkar</string>
+    <!-- LoginActivity -->
+    <string name="txt_1">Welcome back!</string>
+    <string name="txt_2">Login in to your existent account</string>
+
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot">Forgot Password?</string>
+    <string name="login">Login</string>
+    <string name="or">or</string>
+
+
+    <!-- RegisterActivity -->
+    <string name="txt_3">Let’s Get Started!</string>
+    <string name="txt_4">Create an account to get access all feature of our app</string>
+    <string name="register">Register</string>
+    <string name="create">Create</string>
+    <string name="password1">Confirm Password</string>
+    <string name="sign_out">Sign Out</string>
+</resources>

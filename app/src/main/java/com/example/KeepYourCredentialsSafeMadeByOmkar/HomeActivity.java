@@ -2,6 +2,8 @@ package com.example.KeepYourCredentialsSafeMadeByOmkar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -13,7 +15,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,34 +26,43 @@ import java.util.zip.Inflater;
 
 public class HomeActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
-    private ListView list_view;
+    private FloatingActionButton floating_btn;
+    private RecyclerView recyclerView;
+    private CredentialAdapter credentialAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         mAuth = FirebaseAuth.getInstance();
-        list_view = findViewById(R.id.list_view);
+        recyclerView = findViewById(R.id.rv);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        List<Credential> list = new ArrayList<>();
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
-        list.add(new Credential("Google", "prajpatiomkar01@gmail.com", "*********","02/07/22"));
+        FirebaseRecyclerOptions<Credential> options =
+                new FirebaseRecyclerOptions.Builder<Credential>()
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("users"), Credential.class)
+                        .build();
+        credentialAdapter = new CredentialAdapter(options);
+        recyclerView.setAdapter(credentialAdapter);
 
-
-
-        CredentialAdapter credentialAdapter = new CredentialAdapter(getApplicationContext(), list);
-        list_view.setAdapter(credentialAdapter);
+        floating_btn = findViewById(R.id.floating_btn);
+        floating_btn.setOnClickListener((view -> {
+            startActivity(new Intent(getApplicationContext(), AddActivity.class));
+            finish();
+        }));
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        credentialAdapter.startListening();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        credentialAdapter.stopListening();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -69,4 +83,5 @@ public class HomeActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
 }

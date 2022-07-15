@@ -1,20 +1,16 @@
 package com.example.KeepYourCredentialsSafeMadeByOmkar;
 
 public class Credential {
-    private String title,userEmailId,password,date;
+    String title,account,password,date;
 
-    public Credential(String title, String userEmailId, String password,String date) {
+    Credential(){
+
+    }
+
+    public Credential(String title, String account, String password,String date) {
         this.title = title;
-        this.userEmailId = userEmailId;
+        this.account = account;
         this.password = password;
-        this.date = date;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
         this.date = date;
     }
 
@@ -26,12 +22,12 @@ public class Credential {
         this.title = title;
     }
 
-    public String getUserEmailId() {
-        return userEmailId;
+    public String getAccount() {
+        return account;
     }
 
-    public void setUserEmailId(String userEmailId) {
-        this.userEmailId = userEmailId;
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getPassword() {
@@ -40,5 +36,13 @@ public class Credential {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }

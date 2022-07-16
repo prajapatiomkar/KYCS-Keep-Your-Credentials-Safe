@@ -40,7 +40,7 @@ public class HomeActivity extends AppCompatActivity {
 
         FirebaseRecyclerOptions<Credential> options =
                 new FirebaseRecyclerOptions.Builder<Credential>()
-                        .setQuery(FirebaseDatabase.getInstance().getReference().child("users"), Credential.class)
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child(mAuth.getUid()), Credential.class)
                         .build();
         credentialAdapter = new CredentialAdapter(options);
         recyclerView.setAdapter(credentialAdapter);

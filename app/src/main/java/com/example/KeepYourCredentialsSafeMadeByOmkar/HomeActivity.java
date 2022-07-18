@@ -1,6 +1,7 @@
 package com.example.KeepYourCredentialsSafeMadeByOmkar;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Inflater;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity  {
     private FirebaseAuth mAuth;
     private FloatingActionButton floating_btn;
     private RecyclerView recyclerView;
@@ -83,5 +84,6 @@ public class HomeActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
 
 }

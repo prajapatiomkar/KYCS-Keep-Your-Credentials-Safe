@@ -51,6 +51,7 @@ dependencies {
     implementation "androidx.cardview:cardview:1.0.0"
     implementation 'com.firebaseui:firebase-ui-database:8.0.1'
     implementation 'com.orhanobut:dialogplus:1.11@aar'
+    implementation 'androidx.biometric:biometric:1.2.0-alpha04'
 
 
 }

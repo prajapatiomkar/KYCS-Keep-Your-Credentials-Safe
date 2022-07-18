@@ -1,5 +1,9 @@
 package com.example.KeepYourCredentialsSafeMadeByOmkar;
 
+import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG;
+import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK;
+import static androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -17,7 +21,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.biometric.BiometricPrompt;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -35,6 +42,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 public class CredentialAdapter extends FirebaseRecyclerAdapter<Credential, CredentialAdapter.myViewHolder> {
     /**
@@ -44,146 +52,222 @@ public class CredentialAdapter extends FirebaseRecyclerAdapter<Credential, Crede
      * @param options
      */
     View mView;
-    private FirebaseAuth mAuth;
     SecurityPipeline securityPipeline;
+    private FirebaseAuth mAuth;
+    private Executor executor;
+    private BiometricPrompt biometricPrompt;
+    private BiometricPrompt biometricPrompt1;
+    private BiometricPrompt.PromptInfo promptInfo;
+
 
     public CredentialAdapter(@NonNull FirebaseRecyclerOptions<Credential> options) {
         super(options);
+
     }
 
     @Override
     protected void onBindViewHolder(@NonNull myViewHolder holder, @SuppressLint("RecyclerView") final int position, @NonNull Credential credential) {
         securityPipeline = new SecurityPipeline();
         mAuth = FirebaseAuth.getInstance();
+        holder.view_user_password.setText("Tap to see you password");
+        // Biometric //
+
+        executor = ContextCompat.getMainExecutor(holder.view_title.getContext());
+
+
+        promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Biometric Authentication")
+                .setSubtitle("Login using finger Auth")
+                .setAllowedAuthenticators(BIOMETRIC_STRONG | DEVICE_CREDENTIAL | BIOMETRIC_WEAK)
+                .build();
+        // Biometric //
+
         try {
             holder.view_title.setText(securityPipeline.decrypt(credential.getTitle(), mAuth.getUid()));
             holder.view_user_email_id.setText(securityPipeline.decrypt(credential.getAccount(), mAuth.getUid()));
-            holder.view_user_password.setText(securityPipeline.decrypt(credential.getPassword(), mAuth.getUid()));
             holder.view_date.setText(securityPipeline.decrypt(credential.getDate(), mAuth.getUid()));
 
 
         } catch (Exception e) {
 
-            Log.d("ERROR",e.toString());
+            Log.d("ERROR", e.toString());
         }
-        Toast.makeText(mView.getContext(), " working",Toast.LENGTH_LONG).show();
 
 
         holder.credential_item_card.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-
-                final DialogPlus dialogPlus = DialogPlus.newDialog(holder.view_title.getContext())
-                        .setContentHolder(new ViewHolder(R.layout.update_popup))
-                        .setExpanded(true, ViewGroup.LayoutParams.WRAP_CONTENT)
-                        .create();
-
-
-                View view1 = dialogPlus.getHolderView();
-                EditText title = view1.findViewById(R.id.update_title_field);
-                EditText account = view1.findViewById(R.id.update_account_field);
-                TextInputEditText password = view1.findViewById(R.id.update_password_field);
-                Button btnUpdate = view1.findViewById(R.id.updateBtn);
-                Button deleteBtn = view1.findViewById(R.id.deleteBtn);
-
-                try {
-                    title.setText(securityPipeline.decrypt(credential.title, mAuth.getUid()));
-                    account.setText(securityPipeline.decrypt(credential.account, mAuth.getUid()));
-                    password.setText(securityPipeline.decrypt(credential.password, mAuth.getUid()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                dialogPlus.show();
-
-                btnUpdate.setOnClickListener(new View.OnClickListener() {
-
-                    @RequiresApi(api = Build.VERSION_CODES.O)
+                biometricPrompt1 = new BiometricPrompt((FragmentActivity) holder.view_title.getContext(), executor, new BiometricPrompt.AuthenticationCallback() {
                     @Override
-                    public void onClick(View view) {
-                        update();
-                        InputMethodManager imm = (InputMethodManager) holder.view_title.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                        super.onAuthenticationError(errorCode, errString);
+                        Toast.makeText(holder.view_title.getContext(), errString, Toast.LENGTH_SHORT).show();
                     }
 
-                    @RequiresApi(api = Build.VERSION_CODES.O)
-                    private void update() {
-                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                        LocalDateTime now = LocalDateTime.now();
-                        String date = dtf.format(now);
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("title", title.getText().toString());
-                        map.put("account", account.getText().toString());
-                        map.put("password", password.getText().toString());
-                        map.put("date", date);
-                        FirebaseDatabase.getInstance().getReference().child(holder.mAuth.getUid())
-                                .child(getRef(position).getKey()).updateChildren(map)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void unused) {
-                                        Toast.makeText(holder.view_title.getContext(), "Update successfully", Toast.LENGTH_SHORT).show();
-                                        dialogPlus.dismiss();
-
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(holder.view_title.getContext(), "Error", Toast.LENGTH_SHORT).show();
-
-                                    }
-                                });
-                    }
-
-                });
-
-                deleteBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View view) {
-                        delete();
-                        InputMethodManager imm = (InputMethodManager) holder.view_title.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                        super.onAuthenticationSucceeded(result);
+                        final DialogPlus dialogPlus = DialogPlus.newDialog(holder.view_title.getContext())
+                                .setContentHolder(new ViewHolder(R.layout.update_popup))
+                                .setExpanded(true, ViewGroup.LayoutParams.WRAP_CONTENT)
+                                .create();
 
-                    }
 
-                    private void delete() {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(holder.view_title.getContext());
-                        builder.setTitle("Are you sure?");
-                        builder.setCancelable(false);
-                        builder.setMessage("Deleted data can't be Undo");
+                        View view1 = dialogPlus.getHolderView();
+                        EditText title = view1.findViewById(R.id.update_title_field);
+                        EditText account = view1.findViewById(R.id.update_account_field);
+                        TextInputEditText password = view1.findViewById(R.id.update_password_field);
+                        Button btnUpdate = view1.findViewById(R.id.updateBtn);
+                        Button deleteBtn = view1.findViewById(R.id.deleteBtn);
 
-                        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                        try {
+                            title.setText(securityPipeline.decrypt(credential.title, mAuth.getUid()));
+                            account.setText(securityPipeline.decrypt(credential.account, mAuth.getUid()));
+                            password.setText(securityPipeline.decrypt(credential.password, mAuth.getUid()));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        dialogPlus.show();
+
+                        btnUpdate.setOnClickListener(new View.OnClickListener() {
+
+                            @RequiresApi(api = Build.VERSION_CODES.O)
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
+                            public void onClick(View view) {
+                                try {
+                                    update();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                InputMethodManager imm = (InputMethodManager) holder.view_title.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                            }
+
+                            @RequiresApi(api = Build.VERSION_CODES.O)
+                            private void update() throws Exception {
+                                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                                LocalDateTime now = LocalDateTime.now();
+                                String date = dtf.format(now);
+                                Map<String, Object> map = new HashMap<>();
+                                map.put("title", securityPipeline.encrypt(title.getText().toString(), mAuth.getUid()));
+                                map.put("account", securityPipeline.encrypt(account.getText().toString(), mAuth.getUid()));
+                                map.put("password", securityPipeline.encrypt(password.getText().toString(), mAuth.getUid()));
+                                map.put("date", securityPipeline.encrypt(date, mAuth.getUid()));
                                 FirebaseDatabase.getInstance().getReference().child(holder.mAuth.getUid())
-                                        .child(Objects.requireNonNull(getRef(position).getKey())).removeValue()
+                                        .child(getRef(position).getKey()).updateChildren(map)
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void unused) {
+                                                Toast.makeText(holder.view_title.getContext(), "Update successfully", Toast.LENGTH_SHORT).show();
                                                 dialogPlus.dismiss();
-                                                Toast.makeText(holder.view_title.getContext(), "Deleted successfully", Toast.LENGTH_SHORT).show();
+
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(holder.view_title.getContext(), "Error", Toast.LENGTH_SHORT).show();
+
                                             }
                                         });
                             }
+
                         });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                        deleteBtn.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                Toast.makeText(holder.view_title.getContext(), "Cancel", Toast.LENGTH_SHORT).show();
+                            public void onClick(View view) {
+                                delete();
+                                InputMethodManager imm = (InputMethodManager) holder.view_title.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
                             }
+
+                            private void delete() {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(holder.view_title.getContext());
+                                builder.setTitle("Are you sure?");
+                                builder.setCancelable(false);
+                                builder.setMessage("Deleted data can't be Undo");
+
+                                builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        FirebaseDatabase.getInstance().getReference().child(holder.mAuth.getUid())
+                                                .child(Objects.requireNonNull(getRef(position).getKey())).removeValue()
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void unused) {
+                                                        dialogPlus.dismiss();
+                                                        Toast.makeText(holder.view_title.getContext(), "Deleted successfully", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                    }
+                                });
+                                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        Toast.makeText(holder.view_title.getContext(), "Cancel", Toast.LENGTH_SHORT).show();
+
+                                    }
+                                });
+                                builder.show();
+                            }
                         });
-                        builder.show();
+
+                    }
+
+                    @Override
+                    public void onAuthenticationFailed() {
+                        super.onAuthenticationFailed();
                     }
                 });
-
+                biometricPrompt1.authenticate(promptInfo);
                 return true;
+            }
+
+        });
+
+        holder.view_user_password.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    biometricPrompt = new BiometricPrompt((FragmentActivity) holder.view_title.getContext(), executor, new BiometricPrompt.AuthenticationCallback() {
+                        @Override
+                        public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                            super.onAuthenticationError(errorCode, errString);
+                            Toast.makeText(holder.view_title.getContext(), errString, Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                            super.onAuthenticationSucceeded(result);
+                            try {
+                                holder.view_user_password.setText(securityPipeline.decrypt(credential.getPassword(), mAuth.getUid()));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+
+                        @Override
+                        public void onAuthenticationFailed() {
+                            super.onAuthenticationFailed();
+                            Toast.makeText(holder.view_title.getContext(), "Fail to Verify", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+                    biometricPrompt.authenticate(promptInfo);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
 
         });
-    }
 
+    }
 
     @NonNull
     @Override
@@ -195,11 +279,10 @@ public class CredentialAdapter extends FirebaseRecyclerAdapter<Credential, Crede
     }
 
     class myViewHolder extends RecyclerView.ViewHolder {
+        private final FirebaseAuth mAuth;
         TextView view_title, view_user_email_id, view_user_password, view_date;
         CardView credential_item_card;
         Button deleteBtn;
-
-        private FirebaseAuth mAuth;
 
         public myViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -217,6 +300,5 @@ public class CredentialAdapter extends FirebaseRecyclerAdapter<Credential, Crede
 
         }
     }
-
 
 }

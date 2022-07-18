@@ -1,7 +1,7 @@
 # KYCS-Keep-Your-Credentials-Safe
-![Screenshot_20220719-000929](https://user-images.githubusercontent.com/72141037/179580724-93709cd7-a2ec-464c-ba9d-5462cf16538c.png)
+![Screenshot_20220719-000929](https://user-images.githubusercontent.com/72141037/179580724-93709cd7-a2ec-464c-ba9d-5462cf16538c.png)  
 
-![Screenshot_20220719-000936](https://user-images.githubusercontent.com/72141037/179580782-ec368975-71db-4849-947e-04570ee6ee56.png)
+![Screenshot_20220719-000936](https://user-images.githubusercontent.com/72141037/179580782-ec368975-71db-4849-947e-04570ee6ee56.png)  
 
 ![Screenshot_20220719-000945](https://user-images.githubusercontent.com/72141037/179580803-f98683e1-b668-4511-b32f-5cf3bc06dfca.png)
 
